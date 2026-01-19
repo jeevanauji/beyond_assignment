@@ -167,7 +167,7 @@ router.put("/delivery-boy/orders/:id/status", verifyDeliveryBoy, async (req, res
 
     order.status = newStatus;
     await order.save();
-
+    await order.populate("assignedTo", "name");
     const io = req.app.get("io");
     if (io) {
       io.to(`delivery:${req.deliveryBoyId}`).emit("orderUpdated", order);
