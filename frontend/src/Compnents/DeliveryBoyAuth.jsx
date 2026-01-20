@@ -18,30 +18,33 @@ const DeliveryBoyAuth = ({ onLoginSuccess }) => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const endpoint = isLogin
-        ? "/api/delivery-boy/login"
-        : "/api/delivery-boy/register";
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const endpoint = isLogin
+      ? "/api/delivery-boy/login"
+      : "/api/delivery-boy/register";
 
-      const response = await axios.post(endpoint, formData);
-      const data = response.data;
+    const response = await axios.post(endpoint, formData);
+    const data = response.data;
 
-      if (isLogin && data.token) {
-        localStorage.setItem("deliveryBoyToken", data.token);
-        navigate("/delivery-boy");
-      } else if (!isLogin && data.success) {
-        alert("Registration successful! You can now log in.");
-        setIsLogin(true);
-      } else {
-        alert(data.message || "Something went wrong.");
+    if (isLogin && data.token) {
+      localStorage.setItem("deliveryBoyToken", data.token);
+      if (onLoginSuccess) {
+        onLoginSuccess();
       }
-    } catch (error) {
-      console.error(error);
-      alert("Error: " + (error.response?.data?.message || "Server error"));
+      navigate("/delivery-boy");
+    } else if (!isLogin && data.success) {
+      alert("Registration successful! You can now log in.");
+      setIsLogin(true);
+    } else {
+      alert(data.message || "Something went wrong.");
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Error: " + (error.response?.data?.message || "Server error"));
+  }
+};
 
   return (
     <div
