@@ -29,12 +29,14 @@ function App() {
   const location = useLocation();
   const [data, setData] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(!!localStorage.getItem("adminToken"));
+  const [isDeliveryBoyLoggedIn, setIsDeliveryBoyLoggedIn] = useState(!!localStorage.getItem("deliveryBoyToken"));
 
   useEffect(() => {
-    // Check login status on mount and location changes
     setIsLoggedIn(!!localStorage.getItem("token"));
+    setIsAdminLoggedIn(!!localStorage.getItem("adminToken"));
+    setIsDeliveryBoyLoggedIn(!!localStorage.getItem("deliveryBoyToken"));
 
-    // Fetch data only on initial mount
     const fetchData = async () => {
       try {
         const result = await axios.get("/");
@@ -52,6 +54,14 @@ function App() {
     setIsLoggedIn(true);
   };
 
+  const handleAdminLoginSuccess = () => {
+    setIsAdminLoggedIn(true);
+  };
+
+  const handleDeliveryBoyLoginSuccess = () => {
+    setIsDeliveryBoyLoggedIn(true);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
@@ -60,13 +70,13 @@ function App() {
 
   const handleLogoutAdmin = () => {
     localStorage.removeItem("adminToken");
-    setIsLoggedIn(false);
+    setIsAdminLoggedIn(false);
     navigate("/admin");
   };
 
   const handleLogoutDeliveryBoy = () => {
     localStorage.removeItem("deliveryBoyToken");
-    setIsLoggedIn(false);
+    setIsDeliveryBoyLoggedIn(false);
     navigate("/delivery-boy/login");
   };
 
@@ -84,9 +94,12 @@ function App() {
     location.pathname === "/admin/orders/request" ||
     location.pathname.startsWith("/admin/edit-product/");
 
-  // Show delivery boy auth page if not logged in
-  if (!isLoggedIn && location.pathname.startsWith("/delivery-boy")) {
-    return <DeliveryBoyAuth onLoginSuccess={handleLoginSuccess} />;
+  if (!isAdminLoggedIn && location.pathname.startsWith("/admin") && location.pathname !== "/admin") {
+    return <Admin onLoginSuccess={handleAdminLoginSuccess} />;
+  }
+
+  if (!isDeliveryBoyLoggedIn && location.pathname.startsWith("/delivery-boy") && location.pathname !== "/delivery-boy/login") {
+    return <DeliveryBoyAuth onLoginSuccess={handleDeliveryBoyLoginSuccess} />;
   }
 
   return (
@@ -124,7 +137,7 @@ function App() {
         />
         <Route path="/order" element={<Order />} />
         <Route path="/delivery-boy" element={<DeliveryBoy />} />
-        <Route path="/delivery-boy/login" element={<DeliveryBoyAuth />} />
+        <Route path="/delivery-boy/login" element={<DeliveryBoyAuth onLoginSuccess={handleDeliveryBoyLoginSuccess} />} />
         <Route path="/delivery-boy/orders" element={<DeliveryBoyOrders />} />
         <Route
           path="/delivery-boy/dashboard"
